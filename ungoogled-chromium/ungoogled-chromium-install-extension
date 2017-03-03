@@ -1,0 +1,45 @@
+#!/bin/sh
+
+set -e
+
+readonly URL_EXT_DL='https://clients2.google.com/service/update2/crx?response=redirect&prodversion=48.0&x=id%3D{id_ext}%26installsource%3Dondemand%26uc'
+readonly PATH_EXTENSIONS="${XDG_CONFIG_HOME:-${HOME}/.config}/chromium/Extensions"
+readonly PATH_TMP_DIR=$(mktemp -d)
+
+trap "rm -rf '${PATH_TMP_DIR}'" ERR
+
+fatal() {
+    echo "$@" >&2
+    exit 1
+}
+
+get_json_value() {
+    grep "\"$2\":" "$1" \
+       | sed 's/^[[:space:]]*[^[:space:]]*[[:space:]]*"\(.*\)".*$/\1/'
+}
+
+main() {
+    if [ $# -lt 1 ]; then
+        fatal "Usage: $0 <extension id>"
+    fi
+
+    readonly ID_EXT="$1"
+
+    mkdir -p "${PATH_EXTENSIONS}"
+    url=$(printf %s "${URL_EXT_DL}" | sed "s/{id_ext}/${ID_EXT}/g")
+
+    wget -O "${PATH_TMP_DIR}/extension.crx" "${url}"
+    7z x -o"${PATH_TMP_DIR}" "${PATH_TMP_DIR}/extension.crx"
+    rm -r "${PATH_TMP_DIR}/_metadata" "${PATH_TMP_DIR}/extension.crx"
+
+    name_ext=$(get_json_value "${PATH_TMP_DIR}/manifest.json" "name" \
+                | sed 's/[^[:alnum:]]/-/g')
+    version_ext=$(get_json_value "${PATH_TMP_DIR}/manifest.json" "version")
+    path_ext="${PATH_EXTENSIONS}/${name_ext}_${version_ext}"
+
+    mv -f "${PATH_TMP_DIR}" "${path_ext}"
+
+    printf %s\\n "Extension installed at ${path_ext}"
+}
+
+main "$@"

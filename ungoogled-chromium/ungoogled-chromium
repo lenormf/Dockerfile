@@ -1,0 +1,21 @@
+#! /usr/bin/env bash
+
+readonly NAME_CONTAINER=chromium
+readonly VERSION_CHROMIUM=55
+readonly OPTIONS_CHROMIUM=( --incognito )
+
+mkdir -p ~/.config/chromium ~/Downloads
+
+if ! docker exec "${NAME_CONTAINER}" chromium "${OPTIONS_CHROMIUM[@]}" "$@"; then
+    xhost +local:docker
+    docker run --rm --privileged --name="${NAME_CONTAINER}" \
+        -v /tmp/.X11-unix:/tmp/.X11-unix:ro \
+        -v ~/Downloads:/home/chromium/Downloads \
+        -v ~/.config/chromium:/home/chromium/.config/chromium \
+        -v ~/.config/pulse/cookie:/home/chromium/.config/pulse/cookie:ro \
+        -v /var/run/user/${UID}/pulse/native:/var/run/user/${UID}/pulse/native:ro \
+        -v /etc/localtime:/etc/localtime:ro \
+        -v /dev/shm:/dev/shm \
+        -v /var/run/dbus:/var/run/dbus:ro \
+        ${USER}/chromium:"${VERSION_CHROMIUM}" chromium "${OPTIONS_CHROMIUM[@]}" "$@"
+fi
