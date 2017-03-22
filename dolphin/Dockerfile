@@ -37,7 +37,7 @@ ENV PULSE_COOKIE /root/.config/pulse/cookie
 
 RUN \
     apt-get update \
-    && apt-get install -y dolphin-emu dolphin-plugins xboxdrv locales
+    && apt-get install -y dolphin-emu dolphin-plugins locales
 
 RUN \
     echo en_US UTF-8 > /etc/locale.gen \
