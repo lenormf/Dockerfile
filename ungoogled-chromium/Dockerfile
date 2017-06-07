@@ -27,7 +27,7 @@ LABEL version="1.1" \
 
 ARG DISPLAY=:0
 ## Chromium version
-ARG VERSION=57.0.2987.110-1
+ARG VERSION=58.0.3029.110-1
 
 ## IDs of the user/group that will own the Downloads directory
 ARG UID=1000
@@ -46,28 +46,22 @@ VOLUME /home/chromium/Downloads/
 VOLUME /home/chromium/.config/chromium/
 VOLUME /home/chromium/.config/pulse/
 
+COPY ./chromium*.deb /root/
+
 WORKDIR /root
 
 RUN \
     apt-get update \
-    && apt-get install -y wget lsb-release \
-    && wget https://github.com/Eloston/ungoogled-chromium/releases/download/${VERSION}/chromium-driver_${VERSION}_amd64.deb \
-            https://github.com/Eloston/ungoogled-chromium/releases/download/${VERSION}/chromium-suid-sandbox_${VERSION}_amd64.deb \
-            https://github.com/Eloston/ungoogled-chromium/releases/download/${VERSION}/chromium-widevine_${VERSION}_amd64.deb \
-            https://github.com/Eloston/ungoogled-chromium/releases/download/${VERSION}/chromium_${VERSION}_amd64.deb \
-            https://github.com/Eloston/ungoogled-chromium/releases/download/${VERSION}/chromium-l10n_${VERSION}_all.deb
-
-RUN \
-    apt-get install -f -y \
-        ./chromium-driver_${VERSION}_amd64.deb \
-        ./chromium-suid-sandbox_${VERSION}_amd64.deb \
-        ./chromium-widevine_${VERSION}_amd64.deb \
+    && apt-get install -f -y \
         ./chromium_${VERSION}_amd64.deb \
+        ./chromium-driver_${VERSION}_amd64.deb \
+        ./chromium-shell_${VERSION}_amd64.deb \
+        ./chromium-widevine_${VERSION}_amd64.deb \
         ./chromium-l10n_${VERSION}_all.deb
 
 RUN \
     rm chromium-driver_${VERSION}_amd64.deb \
-       chromium-suid-sandbox_${VERSION}_amd64.deb \
+       chromium-shell_${VERSION}_amd64.deb \
        chromium-widevine_${VERSION}_amd64.deb \
        chromium_${VERSION}_amd64.deb \
        chromium-l10n_${VERSION}_all.deb
