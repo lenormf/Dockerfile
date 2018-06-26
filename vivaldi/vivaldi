@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+readonly NAME_CONTAINER=vivaldi
+readonly VERSION_VIVALDI=1.15
+readonly OPTIONS_VIVALDI=( )
+
+mkdir -p ~/.config/vivaldi ~/Downloads
+
+if ! docker exec "${NAME_CONTAINER}" vivaldi "${OPTIONS_VIVALDI[@]}" "$@"; then
+    xhost +local:docker
+    docker run --rm --privileged --name="${NAME_CONTAINER}" \
+        -v /tmp/.X11-unix:/tmp/.X11-unix \
+        -v ~/Downloads:/home/vivaldi/Downloads \
+        -v ~/.config/vivaldi:/home/vivaldi/.config/vivaldi \
+        -v ~/.config/pulse/cookie:/home/vivaldi/.config/pulse/cookie:ro \
+        -v /var/run/user/${UID}/pulse/native:/var/run/user/${UID}/pulse/native:ro \
+        -v /etc/localtime:/etc/localtime:ro \
+        -v /dev/shm:/dev/shm \
+        -v /var/run/dbus:/var/run/dbus:ro \
+        -v /dev/bus/usb:/dev/bus/usb \
+        ${USER}/vivaldi:"${VERSION_VIVALDI}" vivaldi "${OPTIONS_VIVALDI[@]}" "$@"
+fi
