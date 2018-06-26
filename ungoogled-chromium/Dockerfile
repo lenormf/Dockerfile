@@ -19,7 +19,7 @@
 ##   ${USER}/chromium
 ##
 
-FROM debian:stretch
+FROM bitnami/minideb:stretch
 MAINTAINER "Frank LENORMAND <lenormf@gmail.com>"
 LABEL version="1.1" \
       description="Run `ungoogled-chromium` in a docker container" \
@@ -27,7 +27,7 @@ LABEL version="1.1" \
 
 ARG DISPLAY=:0
 ## Chromium version
-ARG VERSION=58.0.3029.110-1
+ARG VERSION=67.0.3396.87-1
 
 ## IDs of the user/group that will own the Downloads directory
 ARG UID=1000
@@ -46,25 +46,38 @@ VOLUME /home/chromium/Downloads/
 VOLUME /home/chromium/.config/chromium/
 VOLUME /home/chromium/.config/pulse/
 
-COPY ./chromium*.deb /root/
-
 WORKDIR /root
+
+RUN \
+    install_packages wget ca-certificates \
+    && wget https://github.com/Eloston/ungoogled-chromium-binaries/releases/download/${VERSION}/ungoogled-chromium_${VERSION}.stretch_amd64.deb \
+            https://github.com/Eloston/ungoogled-chromium-binaries/releases/download/${VERSION}/ungoogled-chromium-common_${VERSION}.stretch_amd64.deb \
+            https://github.com/Eloston/ungoogled-chromium-binaries/releases/download/${VERSION}/ungoogled-chromium-driver_${VERSION}.stretch_amd64.deb \
+            https://github.com/Eloston/ungoogled-chromium-binaries/releases/download/${VERSION}/ungoogled-chromium-driver_${VERSION}.stretch_amd64.deb \
+            https://github.com/Eloston/ungoogled-chromium-binaries/releases/download/${VERSION}/ungoogled-chromium-shell_${VERSION}.stretch_amd64.deb \
+            https://github.com/Eloston/ungoogled-chromium-binaries/releases/download/${VERSION}/ungoogled-chromium-l10n_${VERSION}.stretch_all.deb
 
 RUN \
     apt-get update \
     && apt-get install -f -y \
-        ./chromium_${VERSION}_amd64.deb \
-        ./chromium-driver_${VERSION}_amd64.deb \
-        ./chromium-shell_${VERSION}_amd64.deb \
-        ./chromium-widevine_${VERSION}_amd64.deb \
-        ./chromium-l10n_${VERSION}_all.deb
+        ./ungoogled-chromium_${VERSION}.stretch_amd64.deb \
+        ./ungoogled-chromium-common_${VERSION}.stretch_amd64.deb \
+        ./ungoogled-chromium-driver_${VERSION}.stretch_amd64.deb \
+        ./ungoogled-chromium-shell_${VERSION}.stretch_amd64.deb \
+        ./ungoogled-chromium-l10n_${VERSION}.stretch_all.deb
 
 RUN \
-    rm chromium-driver_${VERSION}_amd64.deb \
-       chromium-shell_${VERSION}_amd64.deb \
-       chromium-widevine_${VERSION}_amd64.deb \
-       chromium_${VERSION}_amd64.deb \
-       chromium-l10n_${VERSION}_all.deb
+    rm \
+       ungoogled-chromium_${VERSION}.stretch_amd64.deb \
+       ungoogled-chromium-common_${VERSION}.stretch_amd64.deb \
+       ungoogled-chromium-driver_${VERSION}.stretch_amd64.deb \
+       ungoogled-chromium-shell_${VERSION}.stretch_amd64.deb \
+       ungoogled-chromium-l10n_${VERSION}.stretch_all.deb
+
+RUN \
+    install_packages lsb-release \
+    && chown 0:0 /usr/lib/chromium/chrome-sandbox \
+    && chmod 4755 /usr/lib/chromium/chrome-sandbox
 
 RUN \
     useradd -m -u ${UID} -g ${GID} chromium \
@@ -73,4 +86,4 @@ USER chromium
 
 WORKDIR /home/chromium
 
-CMD chromium
+CMD ungoogled-chromium

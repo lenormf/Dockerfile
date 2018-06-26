@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 
-readonly NAME_CONTAINER=chromium
-readonly VERSION_CHROMIUM=55
+readonly NAME_CONTAINER=ungoogled-chromium
+readonly VERSION_CHROMIUM=67
 readonly OPTIONS_CHROMIUM=( --incognito )
 
 mkdir -p ~/.config/chromium ~/Downloads
@@ -17,5 +17,5 @@ if ! docker exec "${NAME_CONTAINER}" chromium "${OPTIONS_CHROMIUM[@]}" "$@"; the
         -v /etc/localtime:/etc/localtime:ro \
         -v /dev/shm:/dev/shm \
         -v /var/run/dbus:/var/run/dbus:ro \
-        ${USER}/chromium:"${VERSION_CHROMIUM}" chromium "${OPTIONS_CHROMIUM[@]}" "$@"
+        ${USER}/${NAME_CONTAINER}:"${VERSION_CHROMIUM}" chromium "${OPTIONS_CHROMIUM[@]}" "$@"
 fi
