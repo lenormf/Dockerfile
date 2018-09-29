@@ -27,9 +27,9 @@ LABEL version="1.0" \
 
 ARG DISPLAY=:0
 ## Vivaldi version
-ARG VERSION=1.15.1147.36-1_amd64
+ARG VERSION=2.0.1309.29-2_amd64
 ## Codecs version
-ARG CODECS_VERSION=65.0.3325.181-0ubuntu1_amd64
+ARG CODECS_VERSION=69.0.3497.100-0ubuntu1_amd64
 
 ## IDs of the user/group that will own the Downloads directory
 ARG UID=1000
