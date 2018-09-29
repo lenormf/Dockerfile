@@ -28,8 +28,6 @@ LABEL version="1.0" \
 ARG DISPLAY=:0
 ## Vivaldi version
 ARG VERSION=2.0.1309.29-2_amd64
-## Codecs version
-ARG CODECS_VERSION=69.0.3497.100-0ubuntu1_amd64
 
 ## IDs of the user/group that will own the Downloads directory
 ARG UID=1000
@@ -59,16 +57,14 @@ RUN \
     && rm -f "./vivaldi-stable_${VERSION}.deb"
 
 RUN \
-    install_packages binutils tar xz-utils \
-    && wget "http://security.ubuntu.com/ubuntu/pool/universe/c/chromium-browser/chromium-codecs-ffmpeg-extra_${CODECS_VERSION}.deb" \
-    && ar p "chromium-codecs-ffmpeg-extra_${CODECS_VERSION}.deb" data.tar.xz | tar Jx ./usr/lib/chromium-browser/libffmpeg.so --strip 4 \
-    && mkdir -p /home/vivaldi/.local/lib/vivaldi \
-    && mv libffmpeg.so /home/vivaldi/.local/lib/vivaldi/libffmpeg.so \
-    && rm -f "chromium-codecs-ffmpeg-extra_${CODECS_VERSION}.deb"
-
-RUN \
     useradd -m -u ${UID} -g ${GID} vivaldi \
     && chown -R ${UID}:${GID} /home/vivaldi
+
+# https://help.vivaldi.com/article/html5-proprietary-media-on-linux/
+RUN \
+    install_packages binutils curl tar xz-utils \
+    && curl -Lr1078- vvld.in/lm64 | tar xJ -C /home/vivaldi --wildcards \*libffmpeg\.so --xform 's,.*/,.local/lib/vivaldi/,'
+
 USER vivaldi
 
 WORKDIR /home/vivaldi
