@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 readonly NAME_CONTAINER=vivaldi
-readonly VERSION_VIVALDI=2.0
+readonly VERSION_VIVALDI=2.1
 readonly OPTIONS_VIVALDI=( )
 
 mkdir -p ~/.config/vivaldi ~/Downloads
