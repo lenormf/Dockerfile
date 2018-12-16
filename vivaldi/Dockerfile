@@ -27,7 +27,7 @@ LABEL version="1.0" \
 
 ARG DISPLAY=:0
 ## Vivaldi version
-ARG VERSION=2.1.1337.36-1_amd64
+ARG VERSION=2.2.1388.34-1_amd64
 
 ## IDs of the user/group that will own the Downloads directory
 ARG UID=1000
@@ -60,13 +60,13 @@ RUN \
     useradd -m -u ${UID} -g ${GID} vivaldi \
     && chown -R ${UID}:${GID} /home/vivaldi
 
-# https://help.vivaldi.com/article/html5-proprietary-media-on-linux/
-RUN \
-    install_packages binutils curl tar xz-utils \
-    && curl -L vvld.in/lm64 | tail -c+1079 | tar xJ -C / --wildcards \*libffmpeg\.so --xform 's,.*/,opt/vivaldi/,'
+RUN install_packages binutils curl tar xz-utils
 
 USER vivaldi
 
 WORKDIR /home/vivaldi
+
+# https://help.vivaldi.com/article/html5-proprietary-media-on-linux/
+RUN curl -L vvld.in/lm64 | tail -c+1075 | tar CxJ ~ --wildcards \*libffmpeg\.so --xform 's,.*/,.local/lib/vivaldi/,'
 
 CMD vivaldi
