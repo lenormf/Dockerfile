@@ -57,6 +57,10 @@ RUN \
     && rm -f "./vivaldi-stable_${VERSION}.deb"
 
 RUN \
+    install_packages libasound2-plugins \
+    && echo cGNtLmRlZmF1bHQgcHVsc2UKY3RsLmRlZmF1bHQgcHVsc2UK | base64 -d > /etc/asound.conf
+
+RUN \
     useradd -m -u ${UID} -g ${GID} vivaldi \
     && chown -R ${UID}:${GID} /home/vivaldi
 
