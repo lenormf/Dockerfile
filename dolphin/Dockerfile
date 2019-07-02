@@ -1,48 +1,71 @@
 ##
 ## Dockerfile by lenormf
 ##
-## docker build --rm \
-##   --build-arg DISPLAY=${DISPLAY} \
-##   -t ${USER}/dolphin .
-## docker run --rm --privileged \
-##   -v /tmp/.X11-unix:/tmp/.X11-unix:ro \
-##   -v /dev/shm:/dev/shm \
-##   -v /var/run/dbus:/var/run/dbus:ro \
-##   -v /var/run/user/$(id -u)/pulse/native:/var/run/user/0/pulse/native:ro \
-##   -v ~/.config/pulse/cookie:/root/.config/pulse/cookie:ro \
-##   -v ???:/root/.dolphin-emu \
-##   -v ???:/root/games:ro \
-##   ${USER}/dolphin-emu
+## docker build --rm -t ${USER}/dolphin .
+## docker run --privileged --rm -v /tmp/.X11-unix/:/tmp/.X11-unix/ \
+##                              -v /var/run/dbus:/var/run/dbus:ro \
+##                              -v /etc/localtime:/etc/localtime:ro \
+##                              -v /var/run/user/${UID}/pulse/native:/var/run/user/${UID}/pulse/native:ro \
+##                              -v ~/roms/:/home/dolphin/games/ \
+##                              -v ~/.dolphin-emu:/home/dolphin/.dolphin-emu/ \
+##                              ${USER}/dolphin
 ##
 
-FROM debian:stretch
-MAINTAINER "Frank LENORMAND <lenormf@gmail.com>"
+FROM alpine:edge
 LABEL version="1.0" \
-      description="Run `dolphin` in a docker container"
+      description="Run `dolphin` in a docker container" \
+      maintainer="Frank LENORMAND <lenormf@gmail.com>" \
+      source="https://github.com/dolphin-emu/dolphin/"
 
+ARG DOLPHIN_VERSION=master
 ARG DISPLAY=:0
 
-VOLUME /tmp/.X11-unix/
-VOLUME /dev/shm/
-VOLUME /var/run/dbus/
-VOLUME /var/run/user/0/pulse/
-VOLUME /root/.dolphin-emu/
-VOLUME /root/games/
-VOLUME /root/.config/pulse/
+ARG UID=1000
+ARG GID=100
 
-ENV PATH /usr/games:$PATH
 ENV DISPLAY ${DISPLAY}
-ENV PULSE_SERVER unix:/var/run/user/0/pulse/native
-ENV PULSE_COOKIE /root/.config/pulse/cookie
+ENV PULSE_SERVER unix:/var/run/user/${UID}/pulse/native
+ENV PULSE_COOKIE /home/dolphin/.config/pulse/cookie
+
+VOLUME /tmp/.X11-unix/:/tmp/.X11-unix/
+VOLUME /var/run/dbus/:/var/run/dbus/:ro
+VOLUME /var/run/user/${UID}/pulse/native:/var/run/user/${UID}/pulse/native:ro
+VOLUME /etc/localtime:/etc/localtime:ro
+VOLUME /home/dolphin/games/
+VOLUME /home/dolphin/.dolphin-emu/
 
 RUN \
-    apt-get update \
-    && apt-get install -y dolphin-emu dolphin-plugins locales
+    apk update \
+    && apk add wget ca-certificates unzip \
+               cmake make gcc g++ \
+               libx11-dev libevdev-dev libxi-dev libusb-dev libxrandr-dev \
+               eudev-dev freeglut-dev pulseaudio-dev qt5-qtbase-x11 qt5-qtbase-dev \
+               mesa-dri-intel ttf-opensans xdg-utils
 
 RUN \
-    echo en_US UTF-8 > /etc/locale.gen \
-    && locale-gen \
-    && echo export LANG=en_US.UTF-8 > /etc/profile.d/utf8.sh \
-    && chmod +x /etc/profile.d/utf8.sh
+    wget -O dolphin-git.zip "https://github.com/dolphin-emu/dolphin/archive/${DOLPHIN_VERSION}.zip" \
+    && unzip dolphin-git.zip \
+    && rm -f dolphin-git.zip \
+    && cd dolphin-${DOLPHIN_VERSION} \
+    && mkdir build \
+    && cd build \
+    && cmake .. \
+    && make -j3 \
+    && make install \
+    && rm -rf /dolphin-${DOLPHIN_VERSION}
+
+# Group 97 is a hack to access the host input devices
+RUN \
+    addgroup -S -g 97 host_input \
+    && { adduser -G host_input -u ${UID} dolphin || true; } \
+    && adduser dolphin video \
+    && adduser dolphin audio \
+    && adduser dolphin input \
+    && mkdir /home/dolphin/.config/ \
+    && chown -R ${UID}:${GID} /home/dolphin
+
+USER dolphin
+
+WORKDIR /home/dolphin
 
 CMD dolphin-emu
