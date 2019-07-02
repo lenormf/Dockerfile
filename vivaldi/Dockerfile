@@ -20,14 +20,14 @@
 ##
 
 FROM bitnami/minideb:unstable
-MAINTAINER "Frank LENORMAND <lenormf@gmail.com>"
 LABEL version="1.0" \
       description="Run `vivaldi` in a docker container" \
+      maintainer="Frank LENORMAND <lenormf@gmail.com>" \
       source="https://vivaldi.com/"
 
 ARG DISPLAY=:0
 ## Vivaldi version
-ARG VERSION=2.5.1525.43-1_amd64
+ARG VERSION=2.6.1566.44-1_amd64
 
 ## IDs of the user/group that will own the Downloads directory
 ARG UID=1000
@@ -35,7 +35,7 @@ ARG GID=100
 
 ENV DISPLAY ${DISPLAY}
 ENV PULSE_SERVER unix:/var/run/user/${UID}/pulse/native
-ENV PULSE_COOKIE /root/.config/pulse/cookie
+ENV PULSE_COOKIE /home/vivaldi/.config/pulse/cookie
 
 VOLUME /tmp/.X11-unix/:/tmp/.X11-unix/
 VOLUME /dev/shm:/dev/shm
