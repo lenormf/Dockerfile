@@ -64,7 +64,7 @@ RUN \
     useradd -m -u ${UID} -g ${GID} vivaldi \
     && chown -R ${UID}:${GID} /home/vivaldi
 
-RUN install_packages binutils curl tar xz-utils
+RUN install_packages binutils curl tar xz-utils fonts-noto
 
 USER vivaldi
 
