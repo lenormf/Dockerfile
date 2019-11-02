@@ -56,21 +56,23 @@ RUN \
         "./vivaldi-stable_${VERSION}.deb" \
     && rm -f "./vivaldi-stable_${VERSION}.deb"
 
+RUN install_packages binutils curl tar xz-utils fonts-noto
+
 RUN \
     install_packages libasound2-plugins \
     && echo cGNtLmRlZmF1bHQgcHVsc2UKY3RsLmRlZmF1bHQgcHVsc2UK | base64 -d > /etc/asound.conf
+
+# https://help.vivaldi.com/article/html5-proprietary-media-on-linux/
+RUN \
+    /opt/vivaldi/update-ffmpeg \
+    && /opt/vivaldi/update-widevine
 
 RUN \
     useradd -m -u ${UID} -g ${GID} vivaldi \
     && chown -R ${UID}:${GID} /home/vivaldi
 
-RUN install_packages binutils curl tar xz-utils fonts-noto
-
 USER vivaldi
 
 WORKDIR /home/vivaldi
-
-# https://help.vivaldi.com/article/html5-proprietary-media-on-linux/
-RUN curl -L vvld.in/lm64 | tail -c+1075 | tar CxJ ~ --wildcards \*libffmpeg\.so --xform 's,.*/,.local/lib/vivaldi/,'
 
 CMD vivaldi
