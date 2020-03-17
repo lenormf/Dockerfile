@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+readonly NAME_CONTAINER=tor-browser
+readonly VERSION_TOR_BROWSER=9.0.6
+readonly OPTIONS_TOR_BROWSER=( )
+
+if ! docker exec "${NAME_CONTAINER}" tor-browser "${OPTIONS_TOR_BROWSER[@]}" "$@"; then
+    xhost +local:docker
+    docker run --rm --privileged --name="${NAME_CONTAINER}" \
+        -v /tmp/.X11-unix:/tmp/.X11-unix \
+        -v ~/Downloads:/home/tor-browser/Downloads \
+        -v ~/.config/pulse/cookie:/home/tor-browser/.config/pulse/cookie:ro \
+        -v /var/run/user/${UID}/pulse/native:/var/run/user/${UID}/pulse/native:ro \
+        -v /etc/localtime:/etc/localtime:ro \
+        -v /dev/shm:/dev/shm \
+        -v /var/run/dbus:/var/run/dbus:ro \
+        -v /dev/bus/usb:/dev/bus/usb \
+        ${USER}/tor-browser:"${VERSION_TOR_BROWSER}" tor-browser "${OPTIONS_TOR_BROWSER[@]}" "$@"
+fi
