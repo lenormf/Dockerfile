@@ -27,7 +27,7 @@ LABEL version="1.0" \
 
 ARG DISPLAY=:0
 ## Vivaldi version
-ARG VERSION=2.9.1705.31-1_amd64
+ARG VERSION=2.11.1811.52-1_amd64
 
 ## IDs of the user/group that will own the Downloads directory
 ARG UID=1000
@@ -55,9 +55,6 @@ RUN \
     && apt-get install -f -y \
         "./vivaldi-stable_${VERSION}.deb" \
     && rm -f "./vivaldi-stable_${VERSION}.deb"
-
-## NOTE: this file is probably created by the package, the repo causes public key errors
-RUN rm /etc/apt/sources.list.d/vivaldi.list
 
 RUN install_packages binutils curl tar xz-utils fonts-noto
 
