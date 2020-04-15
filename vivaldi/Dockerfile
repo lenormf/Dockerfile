@@ -68,7 +68,7 @@ RUN \
     && /opt/vivaldi/update-widevine
 
 RUN \
-    useradd -m -u ${UID} -g ${GID} vivaldi \
+    useradd -m -u ${UID} -g ${GID} -G audio,video vivaldi \
     && chown -R ${UID}:${GID} /home/vivaldi
 
 USER vivaldi

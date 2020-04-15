@@ -18,5 +18,9 @@ if ! docker exec "${NAME_CONTAINER}" vivaldi "${OPTIONS_VIVALDI[@]}" "$@"; then
         -v /dev/shm:/dev/shm \
         -v /var/run/dbus:/var/run/dbus:ro \
         -v /dev/bus/usb:/dev/bus/usb \
-        ${USER}/vivaldi:"${VERSION_VIVALDI}" vivaldi "${OPTIONS_VIVALDI[@]}" "$@"
+        -v /dev/video0:/dev/video0 \
+        -v /dev/video1:/dev/video1 \
+        -v /dev/video2:/dev/video2 \
+        -v /dev/video3:/dev/video3 \
+        ${USER}/vivaldi:"${VERSION_VIVALDI}" "${OPTIONS_VIVALDI[@]}" "$@"
 fi
